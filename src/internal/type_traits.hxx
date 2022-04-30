@@ -1,9 +1,8 @@
 #pragma once /// copyright 2022 viraltaco_ <https://opensource.org/licenses/MIT>
-static_assert ( __cplusplus >= 2020'02, "C++20 is required by: " __FILE__ );
 
 namespace vt::inline detail {
 template <class T, T v> struct integral_constant {
-  using value_type = decltype (v);
+  using value_type = T;
   using type = integral_constant<T, v>;
   static constexpr value_type value = v;
   constexpr value_type operator()() const noexcept { return v; }
