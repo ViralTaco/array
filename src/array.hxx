@@ -1,11 +1,8 @@
 #pragma once /// Copyright 2022 viraltaco_ <https://opensource.org/licenses/MIT>
-
 #include "internal/type_traits.hxx"
 
 namespace vt {
- inline namespace detail {
-  using size_t = decltype (sizeof 0);
- }
+ inline namespace detail { using size_t = decltype (sizeof 0); }
 
  template <class T, const size_t N> struct array {
    using size_type        = vt::size_t;
@@ -18,28 +15,36 @@ namespace vt {
    using const_iterator   = const_pointer;
 
    struct reverse_iterator {
-     iterator pos_;
+     iterator pos;
 
-     constexpr reverse_iterator(iterator _it) : pos_{ _it } {}
-     constexpr auto& operator  *() { return *(pos_ - 1u);  }
-     constexpr auto& operator ++() { --pos_; return *this; }
-     constexpr auto& operator --() { ++pos_; return *this; }
-     constexpr auto friend
-     operator !=(reverse_iterator const& a, reverse_iterator const& b) {
-       return a.pos_ != b.pos_;
-     }
+     // NOLINTNEXTLINE(google-explicit-constructor)
+     explicit(false) constexpr reverse_iterator(iterator it) : pos(it) {}
+
+     constexpr auto& operator  *() { return *(pos - 1); }
+     constexpr auto& operator ++() { --pos; return *this; }
+     constexpr auto& operator --() { ++pos; return *this; }
+     constexpr auto  operator
+     !=(reverse_iterator const& o) { return pos != o.pos; }
    };
-
-   static constexpr size_t size = N;
-   value_type data[N + 1]; // +1 for sentinel
+   value_type data[N + 1];
+   const iterator end_ = data + N;
 
    constexpr reference       operator [](size_t i)       { return data[i]; }
    constexpr const_reference operator [](size_t i) const { return data[i]; }
-   constexpr const_iterator       cbegin()         const { return data;     }
-   constexpr const_iterator         cend()         const { return data + N; }
-   constexpr iterator              begin()               { return data;     }
-   constexpr iterator                end()               { return data + N; }
-   constexpr reverse_iterator     rbegin()               { return data + N; }
-   constexpr reverse_iterator       rend()               { return data;     }
+   constexpr const_iterator       cbegin()         const { return data; }
+   constexpr const_iterator         cend()         const { return end_; }
+   constexpr iterator              begin()               { return data; }
+   constexpr iterator                end()               { return end_; }
+   constexpr reverse_iterator     rbegin()               { return end_; }
+   constexpr reverse_iterator       rend()               { return data; }
+
+   [[nodiscard]] constexpr size_type     size() const { return N; }
+   [[nodiscard]] constexpr size_type max_size() const { return N; }
+   [[nodiscard]] constexpr size_type capacity() const { return N; }
+   [[nodiscard]] constexpr bool         empty() const { return false; }
+
+  friend std::ostream& operator <<(std::ostream& os, array const& a) {
+     return os << a.data;
+   }
  };
 } // namespace vt
