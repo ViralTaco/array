@@ -1,5 +1,6 @@
 #pragma once /// Copyright 2022 viraltaco_ <https://opensource.org/licenses/MIT>
 #include "internal/type_traits.hxx"
+#include "internal/utility.hxx"
 
 namespace vt {
  inline namespace detail { using size_t = decltype (sizeof 0); }
@@ -43,8 +44,22 @@ namespace vt {
    [[nodiscard]] constexpr size_type capacity() const { return N; }
    [[nodiscard]] constexpr bool         empty() const { return false; }
 
-  friend std::ostream& operator <<(std::ostream& os, array const& a) {
+   constexpr vt::array<T, N>& fill(const_reference value) noexcept {
+     for (auto& x: *this) x = value;
+     return *this;
+   }
+
+   constexpr void swap(vt::array<T, N>& other) noexcept {
+     for (auto i = 0; i != N; ++i) vt::swap(this[i], other[i]);
+   }
+
+  friend std::ostream& operator <<(std::ostream& os, vt::array<T, N> const& a) {
      return os << a.data;
+   }
+
+   friend std::istream& operator >>(std::istream& in, vt::array<T, N>& a) {
+     for (auto& x: a) if (not in >> x) break;
+     return in;
    }
  };
 } // namespace vt
