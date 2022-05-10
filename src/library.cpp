@@ -7,8 +7,9 @@ namespace vt::info {
     license = "MIT License. See: <https://opensource.org/licenses/MIT>\n";
  } // namespace vt::info
 
-#include <algorithm>
 int main() {
   vt::array<int, 5> a = { 1, 2, 3, 4, 5, };
-  std::for_each(a.rbegin(), a.rend(), [](auto& i) { std::cout << i << " "; });
+  std::cout << a;
+  auto b = vt::array<char, sizeof "Hello, World!">{ "Hello, World!" };
+  std::cout.put('\n') << b;
 }
