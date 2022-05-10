@@ -50,20 +50,26 @@ namespace vt {
      if (i >= N) throw std::out_of_range("vt::array::at(size_t) const");
      return self[i];
    }
-   constexpr iterator                 begin() noexcept { return data(); }
-   constexpr iterator                   end() noexcept { return data() + N; }
-   constexpr reverse_iterator        rbegin() noexcept { return data() + N; }
-   constexpr reverse_iterator          rend() noexcept { return data(); }
+   constexpr iterator           begin()       noexcept { return data(); }
+   constexpr iterator             end()       noexcept { return data() + N; }
+   constexpr reverse_iterator  rbegin()       noexcept { return data() + N; }
+   constexpr reverse_iterator    rend()       noexcept { return data(); }
    constexpr const_iterator    cbegin() const noexcept { return data(); }
    constexpr const_iterator      cend() const noexcept { return data() + N; }
-   constexpr const_reverse_iterator
-   crbegin() const noexcept { return data() + N; }
    constexpr const_reverse_iterator   crend() const noexcept { return data(); }
+   constexpr const_reverse_iterator crbegin() const noexcept {
+     return data()+ N;
+   }
 
    [[nodiscard]] constexpr size_type     size() const noexcept { return N; }
    [[nodiscard]] constexpr size_type max_size() const noexcept { return N; }
    [[nodiscard]] constexpr size_type capacity() const noexcept { return N; }
    [[nodiscard]] constexpr bool         empty() const noexcept { return !N; }
+
+   constexpr reference       front()       noexcept { return this[0]; }
+   constexpr const_reference front() const noexcept { return this[0]; }
+   constexpr reference        back()       noexcept { return this[N - 1]; }
+   constexpr const_reference  back() const noexcept { return this[N - 1]; }
 
    constexpr vt::array<T, N>& fill(const_reference value) noexcept {
      for (reference x: *this)
