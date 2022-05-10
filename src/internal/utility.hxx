@@ -15,4 +15,11 @@ namespace vt::inline detail {
    a = vt::move(b);
    b = vt::move(_a);
  }
+
+ template <class FwL, class FwR>
+ constexpr FwR swap_ranges(FwL l, FwL last, FwR r) noexcept {
+   for (; l != last; ++l, static_cast<void> (++r))
+     vt::swap(*l, *r);
+   return r;
+ }
 } // namespace vt::inline::detail
