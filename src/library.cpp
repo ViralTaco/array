@@ -2,7 +2,7 @@
 #include "array.hxx"
 
 namespace vt::info {
- static constexpr auto version = "com.viraltaco.array v0.0.2",
+ static constexpr auto version = "com.viraltaco.array v0.1.0",
     copyright = "Copyright 2022 viraltaco_ <https://viraltaco.com/array>\n",
     license = "MIT License. See: <https://opensource.org/licenses/MIT>\n";
  } // namespace vt::info
