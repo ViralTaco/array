@@ -1,8 +1,9 @@
 #pragma once /// copyright 2022 viraltaco_ <https://opensource.org/licenses/MIT>
+#ifndef viraltaco_array_internals_utility_hxx_included
+#define viraltaco_array_internals_utility_hxx_included
 #include "type_traits.hxx"
 
-namespace vt::
-inline detail {
+namespace vt::inline detail {
 template <auto... Is>
 struct integer_sequence {
   static constexpr auto size() noexcept { return sizeof... (Is); }
@@ -25,4 +26,9 @@ constexpr FwR swap_ranges(FwL l, FwL last, FwR r) noexcept {
     vt::swap(*l, *r);
   return r;
 }
+
+template <class T> constexpr T min(T a, T b) noexcept { return a < b ? a : b; }
+template <class T> constexpr T max(T a, T b) noexcept { return a < b ? b : a; }
 } // namespace vt::inline::detail
+
+#endif // viraltaco_array_internals_utility_hxx_included
