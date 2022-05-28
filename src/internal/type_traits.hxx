@@ -1,7 +1,8 @@
 #pragma once /// copyright 2022 viraltaco_ <https://opensource.org/licenses/MIT>
+#ifndef viraltaco_array_internals_type_traits_hxx_included
+#define viraltaco_array_internals_type_traits_hxx_included
 
-namespace vt::
-inline detail {
+namespace vt::inline detail {
 template <class T, T v>
 struct integral_constant {
   using value_type = T;
@@ -51,3 +52,5 @@ struct is_nullptr : vt::is_same<vt::remove_cv_t<T>, decltype(nullptr)> {};
 template <class T>
 static constexpr auto is_nullptr_v = vt::is_nullptr<T>::value;
 } // namespace vt::inline detail
+
+#endif // viraltaco_array_internals_type_traits_hxx_included
