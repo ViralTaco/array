@@ -1,6 +1,5 @@
 #include "numeric.hxx"
-#include "utility.hxx"     // vt::move
-#include "type_traits.hxx" // vt::remove_cvref_t
+#include "utility.hxx" // vt::move
 
 namespace vt::inline detail {
  template <class InputIt1, class InputIt2, class T>
