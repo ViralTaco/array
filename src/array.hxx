@@ -3,12 +3,10 @@
 
 #include "internal/type_traits.hxx"
 #include "internal/utility.hxx"
+#include "internal/numeric.hxx"
 
-class kN;
 namespace vt {
-inline namespace detail {
-using size_t = decltype(sizeof 0);
-}
+inline namespace detail { using size_t = decltype(sizeof 0); }
 
 template <class T, const size_t N>
 struct array {
@@ -53,7 +51,6 @@ struct array {
   /// members:
   value_type self[N + 1];
   const_iterator end_ = self + N;
-
   /// data access:
   constexpr pointer data() noexcept { return self; }
 
@@ -115,9 +112,7 @@ struct array {
 
   /// data mutation:
   constexpr vt::array<T, N> &fill(const_reference value) noexcept {
-    for (reference x : *this) {
-      x = value;
-    }
+    for (auto it = this->begin(); it != this->end_; ++it) { *it = value; }
     return *this;
   }
 
@@ -130,7 +125,8 @@ struct array {
   constexpr bool operator==(Array const &other) const noexcept {
     if constexpr (not std::is_same_v<T, typename Array::value_type>) {
       return false;
-    } else if (N != other.size()) {
+    }
+    if (N != other.size()) {
       return false;
     } else if (this != &other) {
       for (auto i = 0; i != N; ++i) {
@@ -184,6 +180,39 @@ struct array {
   VECTOR_SCALAR_OP_ASSIGN_DEF(&=);
 #undef VECTOR_SCALAR_OP_ASSIGN_DEF
 
+  // vector-vector operators:
+#define VECTOR_VECTOR_OP_DEF(OP)                                   \
+  template <class Array>                                           \
+  constexpr auto operator OP (Array const &other) const noexcept { \
+    if (this->size() < other.size()) { return other + *this; }     \
+                                                                   \
+    constexpr auto kLength = size();                               \
+    auto copy = *this;                                             \
+    for (auto i = 0; i != kLength; ++i)                            \
+      copy[i] = copy[i] OP other[i];                               \
+                                                                   \
+    return copy;                                                   \
+  }                                                                \
+  static_assert(__LINE__, "Require semicolon. Binary (vec-vec) operator.")
+
+  VECTOR_VECTOR_OP_DEF(+);
+  VECTOR_VECTOR_OP_DEF(-);
+  VECTOR_VECTOR_OP_DEF(<<);
+  VECTOR_VECTOR_OP_DEF(>>);
+  VECTOR_VECTOR_OP_DEF(^);
+  VECTOR_VECTOR_OP_DEF(|);
+  VECTOR_VECTOR_OP_DEF(&);
+#undef VECTOR_VECTOR_OP_DEF
+
+  template <class Array>
+  constexpr auto operator *(Array const& o) const {
+    if (size() != o.size()) {
+      throw std::logic_error("vt::array<>::operator *(ArrayTemplate):"
+                             " array size mismatch.");
+    }
+    return vt::inner_product(begin(), end(), o.begin(),
+                             value_type() * Array::value_type());
+  }
   /// friends:
   friend std::ostream &operator<<(std::ostream &os, vt::array<T, N> const &a) {
     if constexpr (vt::is_same_v<T, char>) {
@@ -196,11 +225,9 @@ struct array {
     return os.put(']');
   }
 
-  friend std::istream &operator>>(std::istream &in, vt::array<T, N> &a) {
-    for (reference x : a) {
-      if (not in >> x) {
-        break;
-      }
+  friend std::istream& operator >>(std::istream& in, vt::array<T, N> &a) {
+    for (auto it = a.begin(); it != a.end_; ++it) {
+      if (not (in >> *it)) return in;
     }
     return in;
   }
