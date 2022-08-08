@@ -1,5 +1,4 @@
-#pragma once  /// Copyright 2022 viraltaco_
-              /// <https://opensource.org/licenses/MIT>
+#pragma once /// Copyright 2022 viraltaco_ <https://opensource.org/licenses/MIT>
 
 #include "internal/type_traits.hxx"
 #include "internal/utility.hxx"
@@ -214,7 +213,7 @@ struct array {
                              value_type() * Array::value_type());
   }
   /// friends:
-  friend std::ostream &operator<<(std::ostream &os, vt::array<T, N> const &a) {
+  friend std::ostream& operator <<(std::ostream& os, vt::array<T, N> const& a) {
     if constexpr (vt::is_same_v<T, char>) {
       return os.write(a.data(), a.size());
     }
@@ -225,7 +224,7 @@ struct array {
     return os.put(']');
   }
 
-  friend std::istream& operator >>(std::istream& in, vt::array<T, N> &a) {
+  friend std::istream& operator >>(std::istream& in, vt::array<T, N>& a) {
     for (auto it = a.begin(); it != a.end_; ++it) {
       if (not (in >> *it)) return in;
     }
