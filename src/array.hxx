@@ -13,10 +13,10 @@ struct array {
   using size_type = vt::size_t;
   using value_type = vt::remove_cvref_t<T>;
   using reference = value_type &;
-  using const_reference = value_type const &;
+  using const_reference = value_type const&;
   using pointer = value_type *;
   using iterator = pointer;
-  using const_pointer = value_type const *;
+  using const_pointer = value_type const*;
   using const_iterator = const_pointer;
 
   template <class It>
@@ -27,19 +27,11 @@ struct array {
     // NOLINTNEXTLINE(google-explicit-constructor)
     explicit(false) constexpr reverse_iterator_impl(iterator it) : pos(it) {}
 
-    constexpr auto &operator*() { return *(pos - 1); }
+    constexpr auto& operator  *() { return *(pos - 1); }
+    constexpr auto& operator ++() { --pos; return *this; }
+    constexpr auto& operator --() { ++pos; return *this; }
 
-    constexpr auto &operator++() {
-      --pos;
-      return *this;
-    }
-
-    constexpr auto &operator--() {
-      ++pos;
-      return *this;
-    }
-
-    constexpr auto operator!=(reverse_iterator_impl const &o) {
+    constexpr auto operator !=(reverse_iterator_impl const& o) {
       return pos != o.pos;
     }
   };
@@ -47,93 +39,69 @@ struct array {
   using reverse_iterator = reverse_iterator_impl<iterator>;
   using const_reverse_iterator = reverse_iterator_impl<const_iterator>;
 
+private:
+  using criter = const_reverse_iterator;
+public:
+
   /// members:
-  value_type self[N + 1];
+  value_type self[N + 1U];
   const_iterator end_ = self + N;
+
   /// data access:
-  constexpr pointer data() noexcept { return self; }
+  constexpr auto data()       noexcept { return self; }
+  constexpr auto data() const noexcept { return self; }
+  constexpr auto operator [](size_type i)       noexcept { return self[i]; }
+  constexpr auto operator [](size_type i) const noexcept { return self[i]; }
 
-  constexpr const_pointer data() const noexcept { return self; }
-
-  constexpr reference operator[](size_type i) noexcept { return self[i]; }
-
-  constexpr const_reference operator[](size_type i) const noexcept {
+  constexpr auto& at(size_type i) {
+    if (i >= N) { throw std::out_of_range(__func__); }
     return self[i];
   }
 
-  constexpr reference at(size_type i) {
-    if (i >= N) {
-      throw std::out_of_range("vt::array::at(size_t)");
-    }
+  constexpr auto& at(size_type i) const {
+    if (i >= N) { throw std::out_of_range(__func__); }
     return self[i];
   }
 
-  constexpr const_reference at(size_type i) const {
-    if (i >= N) {
-      throw std::out_of_range("vt::array::at(size_t) const");
-    }
-    return self[i];
-  }
+  constexpr auto   begin() noexcept { return iterator{ data() }; }
+  constexpr auto     end() noexcept { return iterator{  data() + N }; }
+  constexpr auto  rbegin() noexcept { return reverse_iterator{ data() + N }; }
+  constexpr auto    rend() noexcept { return reverse_iterator{ data() }; }
+  constexpr auto  cbegin() const noexcept { return data(); }
+  constexpr auto    cend() const noexcept { return data() + N; }
+  constexpr auto   crend() const noexcept { return criter{ data() }; }
+  constexpr auto crbegin() const noexcept { return criter{ data() + N }; }
 
-  constexpr iterator begin() noexcept { return data(); }
+  [[nodiscard]] constexpr auto     size() const noexcept { return N; }
+  [[nodiscard]] constexpr auto max_size() const noexcept { return N; }
+  [[nodiscard]] constexpr auto capacity() const noexcept { return N; }
+  [[nodiscard]] constexpr auto    empty() const noexcept { return N == 0U; }
 
-  constexpr iterator end() noexcept { return data() + N; }
-
-  constexpr reverse_iterator rbegin() noexcept { return data() + N; }
-
-  constexpr reverse_iterator rend() noexcept { return data(); }
-
-  constexpr const_iterator cbegin() const noexcept { return data(); }
-
-  constexpr const_iterator cend() const noexcept { return data() + N; }
-
-  constexpr const_reverse_iterator crend() const noexcept { return data(); }
-
-  constexpr const_reverse_iterator crbegin() const noexcept {
-    return data() + N;
-  }
-
-  [[nodiscard]] constexpr size_type size() const noexcept { return N; }
-
-  [[nodiscard]] constexpr size_type max_size() const noexcept { return N; }
-
-  [[nodiscard]] constexpr size_type capacity() const noexcept { return N; }
-
-  [[nodiscard]] constexpr bool empty() const noexcept { return !N; }
-
-  constexpr reference front() noexcept { return this[0]; }
-
-  constexpr const_reference front() const noexcept { return this[0]; }
-
-  constexpr reference back() noexcept { return this[N - 1]; }
-
-  constexpr const_reference back() const noexcept { return this[N - 1]; }
-
+  constexpr auto& front()       noexcept { return this[0]; }
+  constexpr auto& front() const noexcept { return this[0]; }
+  constexpr auto&  back()       noexcept { return this[N - 1U]; }
+  constexpr auto&  back() const noexcept { return this[N - 1U]; }
   /// data mutation:
-  constexpr vt::array<T, N> &fill(const_reference value) noexcept {
-    for (auto it = this->begin(); it != this->end_; ++it) { *it = value; }
+  constexpr auto& fill(const_reference value) noexcept {
+    for (auto it = begin(); it != end_; ++it) { *it = value; }
     return *this;
   }
 
-  constexpr void swap(vt::array<T, N> &other) noexcept {
+  constexpr void swap(vt::array<T, N>& other) noexcept {
     vt::swap_ranges(begin(), end(), other.begin());
   }
 
   /// const operators:
-  template <class Array>
-  constexpr bool operator==(Array const &other) const noexcept {
-    if constexpr (not std::is_same_v<T, typename Array::value_type>) {
-      return false;
-    }
-    if (N != other.size()) {
-      return false;
-    } else if (this != &other) {
-      for (auto i = 0; i != N; ++i) {
-        if (self[i] != other.self[i]) {
-          return false;
-        }
-      }
-    }
+  template <class Array, class U = typename Array::value_type>
+  constexpr bool operator ==(Array const& other) const noexcept {
+    if constexpr (not vt::is_same_v<T, U>) return false;
+
+    if (N != other.size()) return false;
+    else if (this == &other) return true;
+
+    for (auto i = 0; i != N; ++i)
+      if (self[i] != other.self[i]) return false;
+
     return true;
   }
 
@@ -217,15 +185,16 @@ struct array {
     if constexpr (vt::is_same_v<T, char>) {
       return os.write(a.data(), a.size());
     }
+
     os << "[ ";
-    for (const_iterator x = a.cbegin(); x != a.cend(); ++x) {
+    for (auto x = a.cbegin(); x != a.cend(); ++x) {
       os << *x << ", ";
     }
     return os.put(']');
   }
 
   friend std::istream& operator >>(std::istream& in, vt::array<T, N>& a) {
-    for (auto it = a.begin(); it != a.end_; ++it) {
+    for (auto it = a.begin(); it != a.end(); ++it) {
       if (not (in >> *it)) return in;
     }
     return in;
