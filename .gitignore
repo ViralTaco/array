@@ -1,0 +1,11 @@
+/*
+/*/*
+!/test/*
+!CMakeList.txt
+!README.MD
+!license
+!/.clang-format
+!/.gitignore
+!/src/array.hxx
+!/src/internal/*.*
+
