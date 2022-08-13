@@ -1,10 +1,11 @@
 #include <iostream>
-#include "array.hxx"
+#include "../src/array.hxx"
 
 namespace vt::info {
-  static constexpr auto version = "com.viraltaco.array v0.2.0",
+  static constexpr auto
+    version   = "com.viraltaco.array v1.0.0",
     copyright = "Copyright 2022 viraltaco_ <https://viraltaco.com/array>\n",
-    license = "MIT License. See: <https://opensource.org/licenses/MIT>\n";
+    license   = "MIT License. See: <https://opensource.org/licenses/MIT>\n";
  } // namespace vt::info
 
 int main() {
