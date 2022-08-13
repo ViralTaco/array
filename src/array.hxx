@@ -1,5 +1,7 @@
 #pragma once /// Copyright 2022 viraltaco_ <https://opensource.org/licenses/MIT>
 
+#include <iosfwd>     // std::{ istream, ostream }
+#include <stdexcept>  // std::{ out_of_range, invalid_argument }
 #include "internal/type_traits.hxx"
 #include "internal/utility.hxx"
 #include "internal/numeric.hxx"
@@ -54,14 +56,11 @@ public:
   constexpr auto operator [](size_type i) const noexcept { return self[i]; }
 
   constexpr auto& at(size_type i) {
-    if (i >= N) { throw std::out_of_range(__func__); }
-    return self[i];
+    if (i >= N) throw std::out_of_range(__func__);
+    else        return self[i];
   }
 
-  constexpr auto& at(size_type i) const {
-    if (i >= N) { throw std::out_of_range(__func__); }
-    return self[i];
-  }
+  constexpr auto& at(size_type i) const { return this->at(i); }
 
   constexpr auto   begin() noexcept { return iterator{ data() }; }
   constexpr auto     end() noexcept { return iterator{  data() + N }; }
@@ -174,12 +173,13 @@ public:
   template <class Array>
   constexpr auto operator *(Array const& o) const {
     if (size() != o.size()) {
-      throw std::logic_error("vt::array<>::operator *(ArrayTemplate):"
-                             " array size mismatch.");
+      throw std::invalid_argument("vt::array<>::operator *(ArrayTemplate):"
+                                  " array size mismatch.");
     }
     return vt::inner_product(begin(), end(), o.begin(),
                              value_type() * Array::value_type());
   }
+
   /// friends:
   friend std::ostream& operator <<(std::ostream& os, vt::array<T, N> const& a) {
     if constexpr (vt::is_same_v<T, char>) {
@@ -194,9 +194,8 @@ public:
   }
 
   friend std::istream& operator >>(std::istream& in, vt::array<T, N>& a) {
-    for (auto it = a.begin(); it != a.end(); ++it) {
-      if (not (in >> *it)) return in;
-    }
+    for (auto it = a.begin(); it != a.end(); ++it)
+      if (not (in >> *it)) break;
     return in;
   }
 };
@@ -205,4 +204,8 @@ public:
 /// If T and U have different types, the behavior is undefined.
 template <class T, class... U>
 array(T, U...) -> array<T, 1 + sizeof...(U)>;
+
+/// @brief Deduce the type and size of the array from a string literal.
+template <class CharT = char, size_t kLen>
+array(CharT const(&)[kLen]) -> array<CharT, kLen>;
 }  // namespace vt
