@@ -43,6 +43,8 @@ struct array {
 
 private:
   using criter = const_reverse_iterator;
+protected:
+  using _invariant = typename vt::integral_constant<size_t, N>;
 public:
 
   /// members:
@@ -91,12 +93,14 @@ public:
   }
 
   /// const operators:
-  template <class Array, class U = typename Array::value_type>
+  template <class Array>
   constexpr bool operator ==(Array const& other) const noexcept {
-    if constexpr (not vt::is_same_v<T, U>) return false;
-
-    if (N != other.size()) return false;
-    else if (this == &other) return true;
+    if constexpr (not vt::is_same_v<T, typename Array::value_type>)
+      return false;
+    if (static_cast<void const*> (this) == static_cast<void const*> (&other))
+      return true;
+    if (N != other.size())
+      return false;
 
     for (auto i = 0; i != N; ++i)
       if (self[i] != other.self[i]) return false;
