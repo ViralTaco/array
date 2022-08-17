@@ -54,8 +54,8 @@ public:
   /// data access:
   constexpr auto data()       noexcept { return self; }
   constexpr auto data() const noexcept { return self; }
-  constexpr auto operator [](size_type i)       noexcept { return self[i]; }
-  constexpr auto operator [](size_type i) const noexcept { return self[i]; }
+  constexpr auto& operator [](size_type i)       noexcept { return self[i]; }
+  constexpr auto& operator [](size_type i) const noexcept { return self[i]; }
 
   constexpr auto& at(size_type i) {
     if (i >= N) throw std::out_of_range(__func__);
