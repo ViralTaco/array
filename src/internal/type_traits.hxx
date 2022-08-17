@@ -46,11 +46,6 @@ template <class T>
 struct remove_cvref { using type = vt::remove_cv_t<vt::remove_ref_t<T>>; };
 template <class T>
 using remove_cvref_t = typename vt::remove_cvref<T>::type;
-
-template <class T>
-struct is_nullptr : vt::is_same<vt::remove_cv_t<T>, decltype(nullptr)> {};
-template <class T>
-static constexpr auto is_nullptr_v = vt::is_nullptr<T>::value;
 } // namespace vt::inline detail
 
 #endif // viraltaco_array_internals_type_traits_hxx_included
