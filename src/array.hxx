@@ -2,21 +2,22 @@
 
 #include <iosfwd>     // std::{ istream, ostream }
 #include <stdexcept>  // std::{ out_of_range, invalid_argument }
+
+#include "internal/size_t.hxx"
 #include "internal/type_traits.hxx"
 #include "internal/utility.hxx"
 #include "internal/numeric.hxx"
 
 namespace vt {
-inline namespace detail { using size_t = decltype(sizeof 0); }
-
 template <class T, const size_t N>
 struct array {
   /// typedefs:
   using size_type = vt::size_t;
   using value_type = vt::remove_cvref_t<T>;
-  using reference = value_type &;
+  using array_type = typename vt::array<value_type, N>;
+  using reference = value_type&;
   using const_reference = value_type const&;
-  using pointer = value_type *;
+  using pointer = value_type*;
   using iterator = pointer;
   using const_pointer = value_type const*;
   using const_iterator = const_pointer;
@@ -41,14 +42,13 @@ struct array {
   using reverse_iterator = reverse_iterator_impl<iterator>;
   using const_reverse_iterator = reverse_iterator_impl<const_iterator>;
 
+
 private:
   using criter = const_reverse_iterator;
-protected:
-  using _invariant = typename vt::integral_constant<size_t, N>;
 public:
 
   /// members:
-  value_type self[N + 1U];
+  value_type self[N];
   const_iterator end_ = self + N;
 
   /// data access:
@@ -83,13 +83,20 @@ public:
   constexpr auto&  back()       noexcept { return this[N - 1U]; }
   constexpr auto&  back() const noexcept { return this[N - 1U]; }
   /// data mutation:
-  constexpr auto& fill(const_reference value) noexcept {
+
+  constexpr void swap(array_type& other) noexcept {
+    vt::swap_ranges(begin(), end(), other.begin());
+  }
+
+  constexpr auto fill(const_reference value) noexcept -> array_type {
     for (auto it = begin(); it != end_; ++it) { *it = value; }
     return *this;
   }
 
-  constexpr void swap(vt::array<T, N>& other) noexcept {
-    vt::swap_ranges(begin(), end(), other.begin());
+  template <class F>
+  constexpr auto apply(F&& op) noexcept -> array_type {
+    for (auto i = 0u; i != N; ++i) { self[i] = op(self[i]); }
+    return *this;
   }
 
   /// const operators:
@@ -103,19 +110,23 @@ public:
       return false;
 
     for (auto i = 0; i != N; ++i)
-      if (self[i] != other.self[i]) return false;
+      if (self[i] != other[i]) return false;
 
     return true;
   }
 
-  constexpr auto operator<=>(vt::array<T, N> const &other) const = default;
+  constexpr auto operator <=>(array_type const&) const = default;
 
-#define VECTOR_SCALAR_OP_DEF(OP)                                       \
-  constexpr auto operator OP(value_type const &value) const noexcept { \
-    auto copy = *this;                                                 \
-    for (reference x : copy) x = x OP value;                           \
-    return copy;                                                       \
-  }                                                                    \
+#define VECTOR_SCALAR_OP_DEF(OP)                                               \
+  constexpr auto operator OP##=(const auto v) noexcept -> array_type {         \
+    return apply([v] (auto& x) { return x OP v; });                            \
+  }                                                                            \
+                                                                               \
+  template <class V>                                                           \
+  constexpr auto operator OP(const V v) const noexcept -> array_type {         \
+    auto a = *this;                                                            \
+    return a.apply([v] (auto& x) { return x OP v; });                          \
+  }                                                                            \
   static_assert(__LINE__, "Require semicolon. Binary operator.")
 
   VECTOR_SCALAR_OP_DEF(+);
@@ -129,40 +140,16 @@ public:
   VECTOR_SCALAR_OP_DEF(|);
   VECTOR_SCALAR_OP_DEF(&);
 #undef VECTOR_SCALAR_OP_DEF
-
-/// mutating operators:
-#define VECTOR_SCALAR_OP_ASSIGN_DEF(OP)                          \
-  constexpr auto operator OP(value_type const &value) noexcept { \
-    for (reference x : *this) x OP value;                        \
-    return *this;                                                \
-  }                                                              \
-  static_assert(__LINE__, "Require semicolon. Binary assignment operator.")
-
-  VECTOR_SCALAR_OP_ASSIGN_DEF(+=);
-  VECTOR_SCALAR_OP_ASSIGN_DEF(-=);
-  VECTOR_SCALAR_OP_ASSIGN_DEF(*=);
-  VECTOR_SCALAR_OP_ASSIGN_DEF(/=);
-  VECTOR_SCALAR_OP_ASSIGN_DEF(%=);
-  VECTOR_SCALAR_OP_ASSIGN_DEF(<<=);
-  VECTOR_SCALAR_OP_ASSIGN_DEF(>>=);
-  VECTOR_SCALAR_OP_ASSIGN_DEF(^=);
-  VECTOR_SCALAR_OP_ASSIGN_DEF(|=);
-  VECTOR_SCALAR_OP_ASSIGN_DEF(&=);
-#undef VECTOR_SCALAR_OP_ASSIGN_DEF
-
-  // vector-vector operators:
-#define VECTOR_VECTOR_OP_DEF(OP)                                   \
-  template <class Array>                                           \
-  constexpr auto operator OP (Array const &other) const noexcept { \
-    if (this->size() < other.size()) { return other + *this; }     \
-                                                                   \
-    constexpr auto kLength = size();                               \
-    auto copy = *this;                                             \
-    for (auto i = 0; i != kLength; ++i)                            \
-      copy[i] = copy[i] OP other[i];                               \
-                                                                   \
-    return copy;                                                   \
-  }                                                                \
+// vector-vector operators:
+#define VECTOR_VECTOR_OP_DEF(OP)                                               \
+  constexpr auto operator OP##=(array_type other) -> array_type {              \
+    return other OP *this;                                                     \
+  }                                                                            \
+                                                                               \
+  constexpr auto operator OP (array_type const& other) const -> array_type {   \
+    constexpr auto handle = [] (auto a, auto b) { return a OP b; };            \
+    return fold(*this, other, array_type{}, handle);                           \
+  }                                                                            \
   static_assert(__LINE__, "Require semicolon. Binary (vec-vec) operator.")
 
   VECTOR_VECTOR_OP_DEF(+);
