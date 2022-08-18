@@ -150,7 +150,7 @@ public:
                                                                                \
   constexpr auto operator OP (array_type const& other) const -> array_type {   \
     constexpr auto handle = [] (auto a, auto b) { return a OP b; };            \
-    return fold(*this, other, array_type{}, handle);                           \
+    return vt::fold(*this, other, vt::array<T, N>{}, handle);                  \
   }                                                                            \
   static_assert(__LINE__, "Require semicolon. Binary (vec-vec) operator.")
 
@@ -172,9 +172,11 @@ public:
     return vt::inner_product(begin(), end(), o.begin(), vt::array<T, N * N>{});
   }
 
+  auto operator *=(array_type const&) = delete;
   /// friends:
-  friend std::ostream& operator <<(std::ostream& os, vt::array<T, N> const& a) {
-    if constexpr (vt::is_same_v<T, char>) {
+  template <class Ostream = std::ostream>
+  friend Ostream& operator <<(Ostream& os, array_type const& a) {
+    if constexpr (vt::is_same_v<value_type, char>) {
       return os.write(a.data(), a.size());
     }
 
@@ -185,7 +187,8 @@ public:
     return os.put(']');
   }
 
-  friend std::istream& operator >>(std::istream& in, vt::array<T, N>& a) {
+  template <class Istream = std::istream>
+  friend Istream& operator >>(Istream& in, vt::array<T, N>& a) {
     for (auto it = a.begin(); it != a.end(); ++it)
       if (not (in >> *it)) break;
     return in;
