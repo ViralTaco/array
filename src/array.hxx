@@ -169,8 +169,7 @@ public:
       throw std::invalid_argument("vt::array<>::operator *(ArrayTemplate):"
                                   " array size mismatch.");
     }
-    return vt::inner_product(begin(), end(), o.begin(),
-                             value_type() * Array::value_type());
+    return vt::inner_product(begin(), end(), o.begin(), vt::array<T, N * N>{});
   }
 
   /// friends:
