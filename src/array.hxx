@@ -1,4 +1,6 @@
 #pragma once /// Copyright 2022 viraltaco_ <https://opensource.org/licenses/MIT>
+#ifndef viraltaco_array_array_hxx_included
+#define viraltaco_array_array_hxx_included
 
 #include <iosfwd>     // std::{ istream, ostream }
 #include <stdexcept>  // std::{ out_of_range, invalid_argument }
@@ -200,3 +202,5 @@ array(T, U...) -> array<T, 1 + sizeof...(U)>;
 template <class CharT = char, size_t kLen>
 array(CharT const(&)[kLen]) -> array<CharT, kLen>;
 }  // namespace vt
+
+#endif // #ifndef viraltaco_array_array_hxx_included
