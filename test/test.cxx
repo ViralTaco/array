@@ -20,7 +20,7 @@ int main() {
   std::cout.put('\n') << #X << ": " << std::boolalpha << (X)
 
 #define VT_PUTS(S)\
-  std::cout.write("\n" S"\n", sizeof S).flush()
+  std::cout.write("\n" S "\n", 2 + sizeof S).flush()
 
 
   vt::array<int, 5> a = { 1, 2, 3, 4, 5, };
