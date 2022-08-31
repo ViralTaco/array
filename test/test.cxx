@@ -5,7 +5,7 @@
 
 namespace vt::info {
   static constexpr auto
-    version   = "com.viraltaco.array v1.3.0~index_array",
+    version   = "com.viraltaco.array v1.3.1",
     copyright = "Copyright 2022 viraltaco_ <https://viraltaco.com/array>\n",
     license   = "MIT License. See: <https://opensource.org/licenses/MIT>\n";
  } // namespace vt::info
@@ -20,7 +20,7 @@ int main() {
   std::cout.put('\n') << #X << ": " << std::boolalpha << (X)
 
 #define VT_PUTS(S)\
-  std::cout.write("\n" S"\n", sizeof S).flush()
+  std::cout.write("\n" S "\n", 2 + sizeof S).flush()
 
 
   vt::array<int, 5> a = { 1, 2, 3, 4, 5, };
