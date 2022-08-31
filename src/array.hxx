@@ -90,29 +90,35 @@ public:
     vt::swap_ranges(begin(), end(), other.begin());
   }
 
-  constexpr auto fill(const_reference value) noexcept -> array_type {
-    for (auto it = begin(); it != end_; ++it) { *it = value; }
-    return *this;
-  }
-
   template <class F>
   constexpr auto apply(F&& op) noexcept -> array_type {
-    for (auto i = 0u; i != N; ++i) { self[i] = op(self[i]); }
+    for (auto it = begin(); it != cend(); ++it) {
+      if constexpr (vt::is_same_v<value_type, F>) {
+        *it = op;
+      } else {
+        *it = static_cast<value_type> (op(*it));
+      }
+    }
     return *this;
   }
 
+  constexpr auto fill(value_type val) noexcept -> array_type {
+    return apply(vt::move(val));
+  }
   /// const operators:
   template <class Array>
   constexpr bool operator ==(Array const& other) const noexcept {
-    if constexpr (not vt::is_same_v<T, typename Array::value_type>)
+    if constexpr (not vt::is_same_v<T, typename Array::value_type>) {
       return false;
-    if (static_cast<void const*> (this) == static_cast<void const*> (&other))
-      return true;
-    if (N != other.size())
-      return false;
+    }
 
-    for (auto i = 0; i != N; ++i)
+    if ((void const*)this == (void const*)&other) {
+      return true;
+    } else if (N != other.size()) {
+      return false;
+    } else for (auto i = 0; i != N; ++i) {
       if (self[i] != other[i]) return false;
+    }
 
     return true;
   }
@@ -163,13 +169,8 @@ public:
   VECTOR_VECTOR_OP_DEF(&);
 #undef VECTOR_VECTOR_OP_DEF
 
-  template <class Array>
-  constexpr auto operator *(Array const& o) const {
-    if (size() != o.size()) {
-      throw std::invalid_argument("vt::array<>::operator *(ArrayTemplate):"
-                                  " array size mismatch.");
-    }
-    return vt::inner_product(begin(), end(), o.begin(), vt::array<T, N * N>{});
+  constexpr auto operator *(array_type const& o) const {
+    return vt::inner_product(cbegin(), cend(), o.cbegin(), vt::array<T, N*N>{});
   }
 
   auto operator *=(array_type const&) = delete;
