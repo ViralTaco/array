@@ -13,16 +13,15 @@
 namespace vt {
 template <class T, const size_t N>
 struct array {
-  /// typedefs:
-  using size_type = vt::size_t;
-  using value_type = vt::remove_cvref_t<T>;
-  using array_type = typename vt::array<value_type, N>;
-  using reference = value_type&;
-  using const_reference = value_type const&;
-  using pointer = value_type*;
-  using iterator = pointer;
-  using const_pointer = value_type const*;
-  using const_iterator = const_pointer;
+  using size_type                        = vt::size_t;
+  using value_type                       = vt::remove_cvref_t<T>;
+  using array_type      [[maybe_unused]] = array;
+  using reference       [[maybe_unused]] = value_type&;
+  using const_reference [[maybe_unused]] = value_type const&;
+  using pointer                          = value_type*;
+  using iterator                         = pointer;
+  using const_pointer                    = value_type const*;
+  using const_iterator                   = const_pointer;
 
   template <class It>
   struct reverse_iterator_impl {
@@ -44,20 +43,14 @@ struct array {
   using reverse_iterator = reverse_iterator_impl<iterator>;
   using const_reverse_iterator = reverse_iterator_impl<const_iterator>;
 
-
-private:
-  using criter = const_reverse_iterator;
-public:
-
   /// members:
   value_type self[N];
-  const_iterator end_ = self + N;
 
-  /// data access:
+ /// data access:
   constexpr auto data()       noexcept { return self; }
   constexpr auto data() const noexcept { return self; }
-  constexpr auto& operator [](size_type i)       noexcept { return self[i]; }
-  constexpr auto& operator [](size_type i) const noexcept { return self[i]; }
+  constexpr auto& operator [](size_type i)       noexcept { return data()[i]; }
+  constexpr auto& operator [](size_type i) const noexcept { return data()[i]; }
 
   constexpr auto& at(size_type i) {
     if (i >= N) throw std::out_of_range(__func__);
@@ -66,14 +59,17 @@ public:
 
   constexpr auto& at(size_type i) const { return this->at(i); }
 
-  constexpr auto   begin() noexcept { return iterator{ data() }; }
-  constexpr auto     end() noexcept { return iterator{  data() + N }; }
-  constexpr auto  rbegin() noexcept { return reverse_iterator{ data() + N }; }
-  constexpr auto    rend() noexcept { return reverse_iterator{ data() }; }
-  constexpr auto  cbegin() const noexcept { return data(); }
-  constexpr auto    cend() const noexcept { return data() + N; }
-  constexpr auto   crend() const noexcept { return criter{ data() }; }
-  constexpr auto crbegin() const noexcept { return criter{ data() + N }; }
+#define VT_MAKE_ITERATOR_BOILERPLATE_(NAME, RET, TYPE)                         \
+  constexpr auto NAME() noexcept -> TYPE { return RET; }                       \
+  constexpr auto NAME() const noexcept -> const_##TYPE { return RET; }         \
+  constexpr auto c##NAME() const noexcept -> const_##TYPE { return RET; }      \
+  static_assert (__LINE__, "Require ';' after " #NAME "() def.")
+
+  VT_MAKE_ITERATOR_BOILERPLATE_( begin, data()    , iterator);
+  VT_MAKE_ITERATOR_BOILERPLATE_(   end, data() + N, iterator);
+  VT_MAKE_ITERATOR_BOILERPLATE_(rbegin, data() + N, reverse_iterator);
+  VT_MAKE_ITERATOR_BOILERPLATE_(  rend, data()    , reverse_iterator);
+#undef VT_MAKE_ITERATOR_BOILERPLATE_
 
   [[nodiscard]] constexpr auto     size() const noexcept { return N; }
   [[nodiscard]] constexpr auto max_size() const noexcept { return N; }
@@ -86,12 +82,12 @@ public:
   constexpr auto&  back() const noexcept { return this[N - 1U]; }
   /// data mutation:
 
-  constexpr void swap(array_type& other) noexcept {
+  constexpr void swap(array& other) noexcept {
     vt::swap_ranges(begin(), end(), other.begin());
   }
 
   template <class F>
-  constexpr auto apply(F&& op) noexcept -> array_type {
+  constexpr auto apply(F&& op) noexcept -> array {
     for (auto it = begin(); it != cend(); ++it) {
       if constexpr (vt::is_same_v<value_type, F>) {
         *it = op;
@@ -102,7 +98,7 @@ public:
     return *this;
   }
 
-  constexpr auto fill(value_type val) noexcept -> array_type {
+  constexpr auto fill(value_type val) noexcept -> array {
     return apply(vt::move(val));
   }
   /// const operators:
@@ -123,15 +119,15 @@ public:
     return true;
   }
 
-  constexpr auto operator <=>(array_type const&) const = default;
+  constexpr auto operator <=>(array const&) const = default;
 
 #define VECTOR_SCALAR_OP_DEF(OP)                                               \
-  constexpr auto operator OP##=(const auto v) noexcept -> array_type {         \
+  constexpr auto operator OP##=(const auto v) noexcept -> array {              \
     return apply([v] (auto& x) { return x OP v; });                            \
   }                                                                            \
                                                                                \
   template <class V>                                                           \
-  constexpr auto operator OP(const V v) const noexcept -> array_type {         \
+  constexpr auto operator OP(const V v) const noexcept -> array {              \
     auto a = *this;                                                            \
     return a.apply([v] (auto& x) { return x OP v; });                          \
   }                                                                            \
@@ -148,15 +144,10 @@ public:
   VECTOR_SCALAR_OP_DEF(|);
   VECTOR_SCALAR_OP_DEF(&);
 #undef VECTOR_SCALAR_OP_DEF
-// vector-vector operators:
 #define VECTOR_VECTOR_OP_DEF(OP)                                               \
-  constexpr auto operator OP##=(array_type other) -> array_type {              \
-    return other OP *this;                                                     \
-  }                                                                            \
-                                                                               \
-  constexpr auto operator OP (array_type const& other) const -> array_type {   \
-    constexpr auto handle = [] (auto a, auto b) { return a OP b; };            \
-    return vt::fold(*this, other, vt::array<T, N>{}, handle);                  \
+  constexpr auto operator OP##=(array o) -> array { return o OP *this; }       \
+  constexpr auto operator OP(array const& other) const -> array {              \
+    return vt::fold(*this, other, array{}, [] (T a, T b) { return a OP b; });  \
   }                                                                            \
   static_assert(__LINE__, "Require semicolon. Binary (vec-vec) operator.")
 
@@ -169,33 +160,31 @@ public:
   VECTOR_VECTOR_OP_DEF(&);
 #undef VECTOR_VECTOR_OP_DEF
 
-  constexpr auto operator *(array_type const& o) const {
+  constexpr auto operator *(array const& o) const {
     return vt::inner_product(cbegin(), cend(), o.cbegin(), vt::array<T, N*N>{});
   }
 
-  auto operator *=(array_type const&) = delete;
+  auto operator *=(array const&) = delete;
   /// friends:
   template <class Ostream = std::ostream>
-  friend Ostream& operator <<(Ostream& os, array_type const& a) {
+  friend Ostream& operator <<(Ostream& os, array const& a) {
     if constexpr (vt::is_same_v<value_type, char>) {
       return os.write(a.data(), a.size());
     }
 
     os << "[ ";
-    for (auto x = a.cbegin(); x != a.cend(); ++x) {
-      os << *x << ", ";
-    }
-    return os.put(']');
+    for (const value_type x: a)
+      os << x << ", ";
+    return os << "]";
   }
 
   template <class Istream = std::istream>
-  friend Istream& operator >>(Istream& in, vt::array<T, N>& a) {
+  friend Istream& operator >>(Istream& in, array& a) {
     for (auto it = a.begin(); it != a.end(); ++it)
       if (not (in >> *it)) break;
     return in;
   }
 };
-// template deduction guide:
 /// @brief Deduce the type and size of the array from the elements.
 /// If T and U have different types, the behavior is undefined.
 template <class T, class... U>
