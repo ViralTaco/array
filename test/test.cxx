@@ -5,7 +5,7 @@
 
 namespace vt::info {
   static constexpr auto
-    version   = "com.viraltaco.array v1.3.4",
+    version   = "com.viraltaco.array v1.3.5~oof",
     copyright = "Copyright 2022 viraltaco_ <https://viraltaco.com/array>\n",
     license   = "MIT License. See: <https://opensource.org/licenses/MIT>\n";
  } // namespace vt::info
