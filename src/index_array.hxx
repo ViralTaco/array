@@ -5,10 +5,9 @@
 
 namespace vt::inline detail {
 
-template <class T, size_t N, class Array = vt::array<T, N>>
-constexpr auto iota(Array self, T i) noexcept -> decltype (self) {
-  while (N > i) self[i] = i++; return self;
-}
+template <class T, size_t N>
+constexpr auto iota(vt::array<T, N> self = {}, T i = {})
+noexcept -> vt::array<T, N> { do self[i] = i; while (++i < N); return self; }
 
 template <class T, size_t N>
 constexpr auto index_array(const T from = {}) noexcept -> vt::array<T, N> {
