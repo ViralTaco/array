@@ -5,7 +5,7 @@
 
 namespace vt::info {
   static constexpr auto
-    version   = "com.viraltaco.array v1.3.2",
+    version   = "com.viraltaco.array v1.3.4",
     copyright = "Copyright 2022 viraltaco_ <https://viraltaco.com/array>\n",
     license   = "MIT License. See: <https://opensource.org/licenses/MIT>\n";
  } // namespace vt::info
@@ -13,15 +13,9 @@ namespace vt::info {
 int main() {
 
 #define ECHO_PSEUDO_STRING(X)                                                  \
-  std::cout.put('\n') << #X << ": '" << (X)                                    \
-                      << "' " << #X << ".size(): " << (X).size()
-
-#define ECHO_EXPR(X)                                                           \
-  std::cout.put('\n') << #X << ": " << std::boolalpha << (X)
-
-#define VT_PUTS(S)\
-  std::cout.write("\n" S "\n", 2 + sizeof (S)).flush()
-
+  std::cout << "\n" #X ": '" << (X) << "' " #X ".size(): " << (X).size()
+#define ECHO_EXPR(X) std::cout.put('\n') << #X << ": " << std::boolalpha << (X)
+#define VT_PUTS(S) std::cout.write("\n" S "\n", 2 + sizeof (S)).flush()
 
   vt::array<int, 5> a = { 1, 2, 3, 4, 5, };
   VT_PUTS("\nvt::array<int, 5> a = { 1, 2, 3, 4, 5, };");
@@ -60,9 +54,8 @@ int main() {
   ECHO_EXPR(c = c - d + 'A');
   ECHO_EXPR(d = d - '0' + 'B');
   ECHO_EXPR((d - 1) == c); assert((d - 1) == c);
-  VT_PUTS("Done.");
-
-  VT_PUTS("\n-------------------------------"
+  VT_PUTS("Done."
+          "\n-------------------------------"
           "\n--        index_array        --"
           "\n-------------------------------");
   auto e = vt::index_array<int, 10>();

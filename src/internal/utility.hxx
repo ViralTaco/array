@@ -4,14 +4,13 @@
 #include "type_traits.hxx"
 
 namespace vt::inline detail {
-template <auto... Is>
-struct integer_sequence {
+template <auto... Is> struct integer_sequence {
   static constexpr auto size() noexcept { return sizeof... (Is); }
 };
 
 template <class T, class U = vt::remove_ref_t<T>>
-[[nodiscard]]
-constexpr U &&move(T &&o) noexcept { return static_cast<U &&> (o); }
+[[nodiscard("Discarding moved value. THIS IS PROBABLY AN ERROR."]]
+constexpr auto move(T&& o) noexcept -> U&& { return static_cast<U &&> (o); }
 
 template <class T>
 constexpr void swap(T &a, T &b) noexcept {

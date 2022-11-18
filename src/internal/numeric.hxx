@@ -51,14 +51,12 @@ namespace vt::inline detail {
   *
   * @param a     Container for the first range.
   * @param b     Container for the second range.
-  * @param init  A container to store the results.
-  * @param op    The function applied over the ranges.
-  * @return      init
+  * @param init  Container for the results range.
+  * @param op    Function over the ranges.
+  * @return      for i in [0, a.size()) do init[i] = op(a[i], b[i])
   *
   * @warning If the range pointed to by `b` has a size lower than that of `a`
   *          the behavior is undefined.
-  *
-  * @throws noexcept<code> (op)</code>
   */
  template <class T, class F>
  constexpr auto fold(auto const& a, auto const& b, T init, F&& op) -> T {
