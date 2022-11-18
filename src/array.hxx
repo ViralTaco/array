@@ -10,45 +10,42 @@
 #include "internal/utility.hxx"
 #include "internal/numeric.hxx"
 
+namespace vt::inline detail {
+  template <class It> struct reverse_iterator {
+    // NOLINTNEXTLINE(google-explicit-constructor)
+    [[nodiscard]] constexpr reverse_iterator(It it) : pos(it) {}
+    
+    constexpr auto& operator   *() const noexcept { return *(pos - 1); }
+    constexpr auto& operator  ++()       noexcept { --pos; return *this; }
+    constexpr auto& operator  --()       noexcept { ++pos; return *this; }
+    constexpr auto  operator <=>(reverse_iterator) const = default;
+
+  private:
+    It pos;
+  };
+} // namespace vt::inline detail
+
 namespace vt {
-template <class T, const size_t N>
-struct array {
-  using size_type                        = vt::size_t;
+template <class T, const size_t N> struct array {
+  using size_type                        = decltype (N);
   using value_type                       = vt::remove_cvref_t<T>;
-  using array_type      [[maybe_unused]] = array;
+  using type            [[maybe_unused]] = array;
+  using array_type      [[maybe_unused]] = type;
   using reference       [[maybe_unused]] = value_type&;
   using const_reference [[maybe_unused]] = value_type const&;
   using pointer                          = value_type*;
   using iterator                         = pointer;
   using const_pointer                    = value_type const*;
   using const_iterator                   = const_pointer;
+  using reverse_iterator                 = vt::reverse_iterator<iterator>;
+  using const_reverse_iterator           = vt::reverse_iterator<const_iterator>;
 
-  template <class It>
-  struct reverse_iterator_impl {
-    using iterator = It;
-    iterator pos;
-
-    // NOLINTNEXTLINE(google-explicit-constructor)
-    explicit(false) constexpr reverse_iterator_impl(iterator it) : pos(it) {}
-
-    constexpr auto& operator  *() { return *(pos - 1); }
-    constexpr auto& operator ++() { --pos; return *this; }
-    constexpr auto& operator --() { ++pos; return *this; }
-
-    constexpr auto operator !=(reverse_iterator_impl const& o) {
-      return pos != o.pos;
-    }
-  };
-
-  using reverse_iterator = reverse_iterator_impl<iterator>;
-  using const_reverse_iterator = reverse_iterator_impl<const_iterator>;
-
-  /// members:
+/// members:
   value_type self[N];
 
- /// data access:
-  constexpr auto data()       noexcept { return self; }
-  constexpr auto data() const noexcept { return self; }
+/// data access:
+  constexpr auto&        data()                  noexcept { return self; }
+  constexpr auto&        data()            const noexcept { return self; }
   constexpr auto& operator [](size_type i)       noexcept { return data()[i]; }
   constexpr auto& operator [](size_type i) const noexcept { return data()[i]; }
 
@@ -80,8 +77,8 @@ struct array {
   constexpr auto& front() const noexcept { return this[0]; }
   constexpr auto&  back()       noexcept { return this[N - 1U]; }
   constexpr auto&  back() const noexcept { return this[N - 1U]; }
-  /// data mutation:
 
+/// data mutation:
   constexpr void swap(array& other) noexcept {
     vt::swap_ranges(begin(), end(), other.begin());
   }
@@ -101,14 +98,15 @@ struct array {
   constexpr auto fill(value_type val) noexcept -> array {
     return apply(vt::move(val));
   }
-  /// const operators:
+
+/// const operators:
   template <class Array>
   constexpr bool operator ==(Array const& other) const noexcept {
     if constexpr (not vt::is_same_v<T, typename Array::value_type>) {
       return false;
     }
 
-    if ((void const*)this == (void const*)&other) {
+    if (vt::pointer_equal(this, &other)) {
       return true;
     } else if (N != other.size()) {
       return false;

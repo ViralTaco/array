@@ -29,6 +29,11 @@ constexpr FwR swap_ranges(FwL l, FwL last, FwR r) noexcept {
 
 template <class T> constexpr T min(T a, T b) noexcept { return a < b ? a : b; }
 template <class T> constexpr T max(T a, T b) noexcept { return a < b ? b : a; }
+
+constexpr auto pointer_equal(auto const* a, auto const* b) noexcept {
+  return static_cast<void const*>(a)
+      == static_cast<void const*>(b);
+}
 } // namespace vt::inline::detail
 
 #endif // viraltaco_array_internals_utility_hxx_included
