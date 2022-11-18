@@ -9,7 +9,7 @@ template <auto... Is> struct integer_sequence {
 };
 
 template <class T, class U = vt::remove_ref_t<T>>
-[[nodiscard("Discarding moved value. THIS IS PROBABLY AN ERROR."]]
+[[nodiscard("Discarding moved value. THIS IS PROBABLY AN ERROR.")]]
 constexpr auto move(T&& o) noexcept -> U&& { return static_cast<U &&> (o); }
 
 template <class T>
