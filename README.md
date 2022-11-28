@@ -1,2 +1,3 @@
 # array
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/c1cb5bc131f647a9a80ff0fca70c8518)](https://app.codacy.com/gh/ViralTaco/array?utm_source=github.com&utm_medium=referral&utm_content=ViralTaco/array&utm_campaign=Badge_Grade_Settings)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/699d793455184afca0cbbe18a853750a)](https://app.codacy.com/gh/ViralTaco/array?utm_source=github.com&utm_medium=referral&utm_content=ViralTaco/array&utm_campaign=Badge_Grade_Settings)
