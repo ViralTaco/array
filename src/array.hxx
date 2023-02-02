@@ -1,9 +1,6 @@
-#pragma once /// Copyright 2022 viraltaco_ <https://opensource.org/licenses/MIT>
+#pragma once /// Copyright viraltaco_ <https://opensource.org/licenses/MIT>
 #ifndef viraltaco_array_array_hxx_included
 #define viraltaco_array_array_hxx_included
-
-#include <iosfwd>     // std::{ istream, ostream }
-#include <stdexcept>  // std::{ out_of_range, invalid_argument }
 
 #include "internal/size_t.hxx"
 #include "internal/type_traits.hxx"
@@ -13,7 +10,7 @@
 namespace vt::inline detail {
   template <class It> struct reverse_iterator {
     // NOLINTNEXTLINE(google-explicit-constructor)
-    [[nodiscard]] constexpr reverse_iterator(It it) : pos(it) {}
+    [[nodiscard]] explicit constexpr reverse_iterator(It it) : pos(it) {}
     
     constexpr auto& operator   *() const noexcept { return *(pos - 1); }
     constexpr auto& operator  ++()       noexcept { --pos; return *this; }
@@ -42,7 +39,7 @@ template <class T, const size_t N> struct array {
 
 /// members:
   value_type self[N];
-
+  
 /// data access:
   constexpr auto&        data()                  noexcept { return self; }
   constexpr auto&        data()            const noexcept { return self; }
@@ -82,7 +79,7 @@ template <class T, const size_t N> struct array {
   constexpr void swap(array& other) noexcept {
     vt::swap_ranges(begin(), end(), other.begin());
   }
-
+  
   template <class F>
   constexpr auto apply(F&& op) noexcept -> array {
     for (auto it = begin(); it != cend(); ++it) {
@@ -100,25 +97,6 @@ template <class T, const size_t N> struct array {
   }
 
 /// const operators:
-  template <class Array>
-  constexpr bool operator ==(Array const& other) const noexcept {
-    if constexpr (not vt::is_same_v<T, typename Array::value_type>) {
-      return false;
-    }
-
-    if (vt::pointer_equal(this, &other)) {
-      return true;
-    } else if (N != other.size()) {
-      return false;
-    } else for (auto i = 0; i != N; ++i) {
-      if (self[i] != other[i]) return false;
-    }
-
-    return true;
-  }
-
-  constexpr auto operator <=>(array const&) const = default;
-
 #define VECTOR_SCALAR_OP_DEF(OP)                                               \
   constexpr auto operator OP##=(const auto v) noexcept -> array {              \
     return apply([v] (auto& x) { return x OP v; });                            \
@@ -158,13 +136,24 @@ template <class T, const size_t N> struct array {
   VECTOR_VECTOR_OP_DEF(&);
 #undef VECTOR_VECTOR_OP_DEF
 
-  constexpr auto operator *(array const& o) const {
-    return vt::inner_product(cbegin(), cend(), o.cbegin(), vt::array<T, N*N>{});
-  }
-
+  auto operator  *(array const&) = delete; // issue #4
   auto operator *=(array const&) = delete;
+
+  template <class Array>
+  constexpr auto operator ==(Array const& o) const noexcept -> bool {
+    if constexpr (not vt::is_same_v<value_type, typename Array::value_type>) {
+      return false;
+    } else if (vt::pointer_equal(this, &o)) {
+      return true;
+    } else {
+      return N == o.size() and [k = *this ^ o] {
+        return not vt::sum(k.cbegin(), k.cend(), T{});
+      }();
+    }
+  }
+  constexpr auto operator <=>(array const&) const = default;
   /// friends:
-  template <class Ostream = std::ostream>
+  template <class Ostream>
   friend Ostream& operator <<(Ostream& os, array const& a) {
     if constexpr (vt::is_same_v<value_type, char>) {
       return os.write(a.data(), a.size());
@@ -176,7 +165,7 @@ template <class T, const size_t N> struct array {
     return os << "]";
   }
 
-  template <class Istream = std::istream>
+  template <class Istream>
   friend Istream& operator >>(Istream& in, array& a) {
     for (auto it = a.begin(); it != a.end(); ++it)
       if (not (in >> *it)) break;
