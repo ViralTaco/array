@@ -7,6 +7,12 @@ namespace vt::inline detail::inline types {
  using size_t  = unsigned long long;
 
  namespace literals {
+ /**
+   * @brief auto operator ""_z(x) -> size_t
+   * @param x unsigned long long
+   * @returns x
+   * @throws noexcept
+   */
   consteval auto operator ""_z(unsigned long long x) noexcept
   -> size_t { return x; }
 
@@ -16,7 +22,8 @@ namespace vt::inline detail::inline types {
    * @returns <code>static_cast<ssize_t> (x)</code>
    * @throws noexcept
    * @warning <code>if x > std::numeric_limits&lt;long long&gt;::max()</code>
-   * the behavior is undefined.
+   * the result will have an implementation specified signed value (Until C++20).
+   
    */
   consteval auto operator ""_sz(unsigned long long x) noexcept
   -> ssize_t { return static_cast<ssize_t> (x); }
