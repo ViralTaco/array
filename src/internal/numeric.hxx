@@ -6,6 +6,28 @@
 
 namespace vt::inline detail {
  /**
+  * @brief Assigns to the given range, incrementing by 1 from the given value.
+  *
+  * @param beg   The beginning of the (in-out) range.
+  * @param end   My only friend. (also in-out)
+  * @param val   The initial value (assigned to *beg).
+  *
+  * @warning If val is signed and `(numeric_limits<T>::max() - (end-beg)) < val`
+  *     (ie: `if val + length_range` overflows), then the behavior is UNDEFINED,
+  *     and the code is ILL-FORMED, NO DIAGNOSYS REQUIRED. (Since c++98)
+  *
+  * @warning If `end` is NOT reachable by incrementing `beg` (ie: `++beg`),
+  *  or if [beg, end) is NOT a valid range, then the program is ILL-FORMED.
+  *
+  * @throws noexcept
+  */
+ template <class FwdIt, class T>
+ constexpr auto iota(FwdIt& beg, FwdIt& end, auto val) noexcept -> void {
+    for (; beg != end; ++beg, static_cast<void> (++val))
+      *beg = val;
+  }
+  
+ /**
   * @brief Computes the inner product of two ranges.
   *
   * @param lhs  The beginning of the first range.
