@@ -5,8 +5,9 @@
 
 namespace vt::info {
   static constexpr auto
-    version   = "com.viraltaco.array v1.3.5~oof",
-    copyright = "Copyright 2022 viraltaco_ <https://viraltaco.com/array>\n",
+    version   = "com.viraltaco.array v1.4.0",
+    copyright = "Copyright 2022, 2023 viraltaco_ <https://viraltaco"
+        ".com/array>\n",
     license   = "MIT License. See: <https://opensource.org/licenses/MIT>\n";
  } // namespace vt::info
 
@@ -71,6 +72,7 @@ int main() {
   assert ((e == vt::array{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10  }));
   ECHO_EXPR(e /= 2);
   assert ((e == vt::array{ 0, 1, 1, 2, 2, 3, 3, 4, 4, 5  }));
+  // ECHO_EXPR(e * f); issue #4
 
   VT_PUTS("Done.");
 #undef ECHO_PSEUDO_STRING
