@@ -8,17 +8,15 @@
 #include "internal/numeric.hxx"
 
 namespace vt::inline detail {
-  template <class It> struct reverse_iterator {
-    // NOLINTNEXTLINE(google-explicit-constructor)
+  template <class It> class reverse_iterator {
+    It pos;
+  public:
     [[nodiscard]] explicit constexpr reverse_iterator(It it) : pos(it) {}
     
     constexpr auto& operator   *() const noexcept { return *(pos - 1); }
     constexpr auto& operator  ++()       noexcept { --pos; return *this; }
     constexpr auto& operator  --()       noexcept { ++pos; return *this; }
     constexpr auto  operator <=>(reverse_iterator) const = default;
-
-  private:
-    It pos;
   };
 } // namespace vt::inline detail
 
@@ -57,7 +55,7 @@ template <class T, const size_t N> struct array {
   constexpr auto NAME() noexcept -> TYPE { return RET; }                       \
   constexpr auto NAME() const noexcept -> const_##TYPE { return RET; }         \
   constexpr auto c##NAME() const noexcept -> const_##TYPE { return RET; }      \
-  static_assert (__LINE__, "Require ';' after " #NAME "() def.")
+  static_assert (!"Missing `;` on line" + __LINE__, #NAME "() def.")
 
   VT_MAKE_ITERATOR_BOILERPLATE_( begin, data()    , iterator);
   VT_MAKE_ITERATOR_BOILERPLATE_(   end, data() + N, iterator);
@@ -107,7 +105,7 @@ template <class T, const size_t N> struct array {
     auto a = *this;                                                            \
     return a.apply([v] (auto& x) { return x OP v; });                          \
   }                                                                            \
-  static_assert(__LINE__, "Require semicolon. Binary operator.")
+  static_assert(!"Missing `;` on line" + __LINE__, "vector-scalar" #OP)
 
   VECTOR_SCALAR_OP_DEF(+);
   VECTOR_SCALAR_OP_DEF(-);
@@ -125,7 +123,7 @@ template <class T, const size_t N> struct array {
   constexpr auto operator OP(array const& other) const -> array {              \
     return vt::fold(*this, other, array{}, [] (T a, T b) { return a OP b; });  \
   }                                                                            \
-  static_assert(__LINE__, "Require semicolon. Binary (vec-vec) operator.")
+  static_assert(!"Missing `;` on line" + __LINE__, "vector-vector" #OP)
 
   VECTOR_VECTOR_OP_DEF(+);
   VECTOR_VECTOR_OP_DEF(-);
