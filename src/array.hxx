@@ -46,8 +46,8 @@ template <class T, const size_t N> struct array {
   constexpr auto& operator [](size_type i)       noexcept { return data()[i]; }
   constexpr auto& operator [](size_type i) const noexcept { return data()[i]; }
 
-  constexpr auto& at(size_type i) {
-    if (i >= N) throw std::out_of_range(__func__);
+  constexpr auto& at(size_type i) noexcept {
+    if (i >= N) return this->end();
     else        return self[i];
   }
 
