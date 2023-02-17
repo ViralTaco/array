@@ -13,7 +13,7 @@
 #include <vector>
 
 namespace {
-using namespace vt::literals;
+using  vt::literals::operator ""_z;
 static constexpr auto kSize = 2'000'000_z;
 static constexpr auto kElem = 36'546_z;
 using u32 = std::uint_least32_t;
