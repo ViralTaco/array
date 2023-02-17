@@ -44,13 +44,6 @@ template <class T, const size_t N> struct array {
   constexpr auto& operator [](size_type i)       noexcept { return data()[i]; }
   constexpr auto& operator [](size_type i) const noexcept { return data()[i]; }
 
-  constexpr auto& at(size_type i) noexcept {
-    if (i >= N) return this->end();
-    else        return self[i];
-  }
-
-  constexpr auto& at(size_type i) const { return this->at(i); }
-
 #define VT_MAKE_ITERATOR_BOILERPLATE_(NAME, RET, TYPE)                         \
   constexpr auto NAME() noexcept -> TYPE { return RET; }                       \
   constexpr auto NAME() const noexcept -> const_##TYPE { return RET; }         \
@@ -63,6 +56,10 @@ template <class T, const size_t N> struct array {
   VT_MAKE_ITERATOR_BOILERPLATE_(  rend, data()    , reverse_iterator);
 #undef VT_MAKE_ITERATOR_BOILERPLATE_
 
+  constexpr auto& at(size_type i) noexcept {
+    return (i < N) ? this[i] : end();
+  }
+  constexpr auto& at(size_type i) const noexcept { return at(i); }
   [[nodiscard]] constexpr auto     size() const noexcept { return N; }
   [[nodiscard]] constexpr auto max_size() const noexcept { return N; }
   [[nodiscard]] constexpr auto capacity() const noexcept { return N; }
@@ -80,11 +77,11 @@ template <class T, const size_t N> struct array {
   
   template <class F>
   constexpr auto apply(F&& op) noexcept -> array {
-    for (auto it = begin(); it != cend(); ++it) {
+    for (auto& e: *this) {
       if constexpr (vt::is_same_v<value_type, F>) {
-        *it = op;
+        e = op;
       } else {
-        *it = static_cast<value_type> (op(*it));
+        e = static_cast<value_type> (op(e));
       }
     }
     return *this;
