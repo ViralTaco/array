@@ -1,6 +1,8 @@
 /*
 /*/*
 !/test/*
+!/bench/*
+!/*/CMakeList.txt
 !CMakeList.txt
 !README.MD
 !license
