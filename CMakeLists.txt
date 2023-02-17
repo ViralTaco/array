@@ -3,15 +3,5 @@ project(vt_array LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 
-#To compile as library use
-#add_library(
-add_executable(
-vt_array
-        src/internal/size_t.hxx
-        src/internal/numeric.hxx
-        src/internal/utility.hxx
-        src/internal/type_traits.hxx
-        src/array.hxx
-        src/index_array.hxx
-        test/test.cxx
-)
+add_executable(test test/test.cxx)
+add_executable(bench bench/bench.cxx)

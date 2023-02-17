@@ -3,13 +3,13 @@
 #include "../src/array.hxx"
 #include "../src/index_array.hxx"
 
-namespace vt::info {
+namespace vt::inline detail::info {
   static constexpr auto
-    version   = "com.viraltaco.array v1.4.0",
-    copyright = "Copyright 2022, 2023 viraltaco_ <https://viraltaco"
-        ".com/array>\n",
-    license   = "MIT License. See: <https://opensource.org/licenses/MIT>\n";
- } // namespace vt::info
+    version   = "com.viraltaco.array v1.4.20"
+  , license   = "MIT License. See: <opensource.org/licenses/MIT>\n"
+  , copyright = "Copyright 22,23 viraltaco_ <viraltaco.com/array>\n"
+  ;
+} // namespace vt::inline detail::info
 
 int main() {
 
