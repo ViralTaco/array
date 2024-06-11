@@ -16,7 +16,7 @@ namespace vt::inline detail {
     constexpr auto& operator   *() const noexcept { return *(pos - 1); }
     constexpr auto& operator  ++()       noexcept { --pos; return *this; }
     constexpr auto& operator  --()       noexcept { ++pos; return *this; }
-    constexpr auto  operator <=>(reverse_iterator) const = default;
+    constexpr auto  operator <=>(reverse_iterator const&) const = default;
   };
 } // namespace vt::inline detail
 
