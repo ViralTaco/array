@@ -1,17 +1,12 @@
-#include <iostream>
 #include <cassert>
+#include <iostream>
+
 #include "../src/array.hxx"
 #include "../src/index_array.hxx"
-
-namespace vt::info {
-  static constexpr auto
-    version   = "com.viraltaco.array v1.4.0",
-    copyright = "Copyright 2022, 2023 viraltaco_ <https://viraltaco"
-        ".com/array>\n",
-    license   = "MIT License. See: <https://opensource.org/licenses/MIT>\n";
- } // namespace vt::info
+#include "../src/internal/info.hxx"
 
 int main() {
+  std::cout << vt::info;
 
 #define ECHO_PSEUDO_STRING(X)                                                  \
   std::cout << "\n" #X ": '" << (X) << "' " #X ".size(): " << (X).size()

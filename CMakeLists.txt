@@ -13,4 +13,5 @@ vt_array
         src/internal/type_traits.hxx
         src/array.hxx
         test/test.cxx
+        src/index_array.hxx
 )
