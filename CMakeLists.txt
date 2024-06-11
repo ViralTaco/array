@@ -12,6 +12,5 @@ vt_array
         src/internal/utility.hxx
         src/internal/type_traits.hxx
         src/array.hxx
-        src/index_array.hxx
         test/test.cxx
 )
